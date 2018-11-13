@@ -1,3 +1,9 @@
+//TODOs: 
+// --Handle Multiple line texts
+// --Add More shapes
+// --Add arrows to lines
+// --make shapes movable
+
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 
