@@ -1,4 +1,4 @@
-//TODOs: 
+//TODOs:
 // --Handle Multiple line texts
 // --Add More shapes
 // --Add arrows to lines
@@ -7,12 +7,16 @@
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 
+var canvasOriginX = 180;
+var canvasOriginY = 10;
+var canvasSpaceBetweenNodes = 80;
 var nodes = [];
 
 var lines = [];
 
 function draw() {
   // clear the canvas
+  resetPositions();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   nodes = [];
   lines = [];
@@ -21,8 +25,18 @@ function draw() {
     const nodeJson = jsonSource.nodes[index];
 
     nodeJson.__proto__ = WorkFlowNode.prototype;
+    if (nodeJson.type) {   
+    }
+    else
+    {
+      nodeJson['type'] = NodeTypeEnum.Rectangle;        
+    }
+    nodeJson.calculatePosX();
+      nodeJson.calculatePosY();
     nodes.push(nodeJson);
   }
+
+
 
   for (let index = 0; index < jsonSource.lines.length; index++) {
     const lineJson = jsonSource.lines[index];
@@ -30,7 +44,7 @@ function draw() {
     lineJson.__proto__ = Line.prototype;
     lines.push(lineJson);
   }
-
+console.log(nodes);
   for (var i = 0; i < nodes.length; i++) {
     var node = nodes[i];
     if (node.type == NodeTypeEnum.Rectangle) {
@@ -80,7 +94,7 @@ function drawLine(ctx, posX, posY, toX, toY) {
   ctx.moveTo(posX, posY);
   ctx.lineTo(toX, toY);
   ctx.stroke();
-  console.log('----------');
+  console.log('------------------------------');
 }
 
 // Rectangle methods
@@ -105,7 +119,14 @@ function drawRectWithText(ctx, text, x, y, radius, fill, stroke) {
   ctx.lineWidth = 4;
   ctx.strokeStyle = '#000000';
   ctx.fillStyle = '#abc';
+  console.log(x);
+  console.log(y);
+  console.log(width);
+  console.log(height);
+  console.log('****************************')
   //ctx.rect(x, y, width, height);
+
+
   roundRect(ctx, x, y, width, height, radius, fill, stroke);
   ctx.font = '20px Georgia';
   ctx.textAlign = 'center';
@@ -153,7 +174,7 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
   }
 }
 
-//calculate sizes
+//calculate sizes and poisitions
 function calculateCircleRadius(text) {
   return text.length * 8;
 }
@@ -167,7 +188,6 @@ function calculateRectWith(text) {
 
 // draw circle methods
 function drawCircle(ctx, text, originX, originY, radius) {
-
   radius = calculateCircleRadius(text);
   ctx.beginPath();
   ctx.arc(originX, originY, radius, 0, 2 * Math.PI);
@@ -179,6 +199,14 @@ function drawCircle(ctx, text, originX, originY, radius) {
   ctx.fillStyle = '#000000';
   ctx.fillText(text, originX, originY);
 }
+
+function resetPositions() {
+  canvasOriginX = 180;
+ canvasOriginY = 10;
+ canvasSpaceBetweenNodes = 80;
+}
+
+
 
 /**
  * Represents a node
@@ -205,6 +233,82 @@ class WorkFlowNode {
     this.fill = fill;
     this.stroke = stroke;
   }
+
+   calculatePosX() {
+
+    if (this.type == NodeTypeEnum.Rectangle) {
+            this.posX = canvasOriginX - calculateRectWith(this.text) / 2;
+          } else if (this.type == NodeTypeEnum.Circle) {
+            this.posX = canvasOriginX;
+          }
+  }
+  
+   calculatePosY() {
+     
+    if (this.type == NodeTypeEnum.Rectangle) {
+            canvasOriginY =
+              canvasOriginY +
+              calculaterectHeight(this.text) +
+              canvasSpaceBetweenNodes;
+          } else if (this.type == NodeTypeEnum.Circle) {
+            canvasOriginY =
+              canvasOriginY +
+              calculateCircleRadius(this.text) +
+              canvasSpaceBetweenNodes;
+          }
+          this.posY =  canvasOriginY;
+  }
+
+  // get posX() {
+  //   if(this._posX && !isNaN(this._posX)){}
+  //   else  {
+  //     if (this.type == NodeTypeEnum.Rectangle) {
+  //       this.posX = canvasOriginX - calculateRectWith / 2;
+  //     } else if (this.type == NodeTypeEnum.Circle) {
+  //       this._posX = canvasOriginX;
+  //     }
+  //   }
+  //   console.log('**');
+  //   console.log(this._posX);
+  //   console.log('**');
+  //   return this._posX;
+  // }
+
+  // set posX(value){ this._posX = value }
+
+  // get posY() {
+  //   if(this._posY){}
+  //   else {
+  //     this._posY = canvasOriginY;
+  //     if (this.type == NodeTypeEnum.Rectangle) {
+  //       canvasOriginY =
+  //         canvasOriginY +
+  //         calculaterectHeight(this.text) +
+  //         canvasSpaceBetweenNodes;
+  //     } else if (this.type == NodeTypeEnum.Circle) {
+  //       canvasOriginY =
+  //         canvasOriginY +
+  //         calculateCircleRadius(this.text) +
+  //         canvasSpaceBetweenNodes;
+  //     }
+  //   }
+  //   return this._posY;
+  // }
+
+  // get type() {
+  //   if (this._type)
+  //   {
+
+  //   }
+  //   else
+  //     this._type = NodeTypeEnum.Rectangle;
+  //   return this._type;
+  // }
+
+  // set type(value){ this._type = value }
+
+  // set posY(value){ this._posY = value }
+
   get width() {
     return calculateRectWith(this.text);
   }
